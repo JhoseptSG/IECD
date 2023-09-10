@@ -105,3 +105,41 @@ legend("topright", legend = c("Estimador MOM", "Estimador EMV", "Estimador EMV_I
        col = c("red", "darkgreen", "blue"), lty = 1, pch = c(19, 19, 19, 16))
 
 
+#Ejercicio 16 
+
+tormentas = read.table("datasets/tormenta.txt", header = TRUE)
+
+x = tormentas$X16.3
+
+library(MASS)
+
+# E(x) = a/y   a = y * mean(x)       --> a = mean(x)^2 / (mean(x^2)-mean(x)^2)
+
+# var(X) = a / y^2 
+
+# E(x^2) = (a + a^2)/y^2 --> mean(x^2) = (y * mean(x)a + y^2 * mean(x)^2)/y^2 --> 
+
+# mean(x^2) = ( mean(x)/y + mean(x)^2 --> y = mean(x) / (mean(x^2)-mean(x)^2) 
+
+gam_mom = c(mean(x)^2/(mean(x^2)-mean(x)^2) ,  mean(x)/(mean(x^2)-mean(x)^2) )
+
+gam_mom
+gam_emv = fitdistr(x, densfun = "gamma")
+gam_emv
+
+type(gam_emv)
+
+prob_Gamma_emv = 1 - pgamma(20, shape = gam_emv$estimate["shape"], rate = gam_emv$estimate["rate"]) 
+
+
+prob_Gamma_mom = 1 - pgamma(20, shape = gam_mom[1], rate = gam_mom[2])
+
+
+frec_rel_gamma = sum((x>20))/length(x)
+
+hist(x, breaks = 20, prob = TRUE, main = "Histograma y Estimaciones de Densidad")
+lines(density(x), col = "red", lwd = 2) # prediccion no parametrica 
+curve(dgamma(x, shape = gam_mom[1], rate = gam_mom[2]), col = "green", add = TRUE,lwd = 3)
+curve(dgamma(x, shape = gam_emv$estimate["shape"], rate = gam_emv$estimate["rate"]), col = "blue", add = TRUE, lwd = 2)
+
+
