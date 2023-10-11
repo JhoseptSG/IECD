@@ -1,0 +1,177 @@
+---
+title: "Bootstrap"
+output: html_document
+date: "2023-10-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+La cantidad de particulas que emite una fuente radiactiva en un minuto es una variable
+aleatoria con distribucion de Poisson de parametro λ. Se midio la cantidad de emisiones en
+intervalos de 1 minuto, obteniendo las siguientes 15 muestras
+
+500  488  426 510  450  368  508  514  426 476  512  526  444  524  236
+Por ej el estimador es 
+```{r}
+#x_2 = scan()
+lambda_est_1ro = mean(x_2)
+lambda_est_2do = (-1 + sqrt(1+4*mean(x_2^2)))/2 
+
+```
+```{r}
+lambda_bootstrap_T1 = replicate(1000,{
+  d_bootstrap = rpois(15,lambda_est_1ro)
+  sd(d_bootstrap)
+})
+lambda_bootstrap_T2 = replicate(1000,{
+  d_bootstrap = rpois(15,lambda_est_2do)
+  sd(d_bootstrap)
+})
+
+hist(lambda_bootstrap_T1)
+hist(lambda_bootstrap_T2)
+
+```
+
+
+3. A partir del archivo datos1.txt, estimar el valor central con las siguientes medidas de posici´on:
+(a) Media (b) Mediana. Para estimar el desv´ıo est´andar de ambos estimadores, se propone
+el siguiente esquema de bootstrap:
+a) Generar una muestra del mismo tama˜no muestral que datos1.txt formada por elementos
+tomados de datos1.txt elegidos al azar con reposici´on.
+b) Calcular la medida de posici´on en dicha muestra.
+c) Repetir el procedimiento B = 1000 veces o m´as y obtener 1000 medidas.
+d) Estimar el desv´ıo est´andar a partir de las medidas obtenidas en el ´ıtem anterior. Comparar los resultados obtenidos
+
+```{r}
+data_ej3 <- read.table('datos1.txt',header = TRUE)
+
+data_ej3 = data_ej3$x
+
+
+```
+
+```{r}
+media_ej3 = mean(data_ej3)
+mediana_ej3 = median(data_ej3)
+
+medida_posicion_ej3 = replicate(1000,{
+  sampled_ej3 = sample(data_ej3, length(data_ej3), replace = TRUE)
+  
+  media_ej3_s = mean(sampled_ej3)
+  mediana_ej3_s = median(sampled_ej3)
+  
+  c(media_ej3_s,mediana_ej3_s)
+})
+sd(medida_posicion_ej3[2,])
+sd(medida_posicion_ej3[1,])
+
+```
+4. (Para hacer con el R) Tenemos un dado que no sabemos si es o no equilibrado. Para estudiarlo, lo tiramos n = 100 veces de manera independiente, obteniendo los siguientes valores,
+que se pueden cargar facilmente al R con la instruccion scan .
+
+2 2 4 6 1 3 1 3 2 4 4 4 4 4 6 3 3 4 1 2 1 6 3 2 3 4 1 1 5 4 1 4 6
+4 1 2 1 5 4 3 3 1 3 1 6 5 1 3 2 3 6 2 4 2 6 6 5 2 4 4 1 4 3 1 2 1
+6 1 1 3 1 6 6 1 2 6 1 1 4 5 4 1 5 2 2 1 6 6 1 2 1 3 1 3 3 4 3 3 3 5
+
+¿Como podemos comprobar si el dado es equilibrado? Haremos dos pruebas sobre los resultados obtenidos.
+a) Queremos estudiar la probabilidad de que un resultado del dado sea par. Llamemos θ
+a dicha probabilidad. ¿Cuanto deberıa valer θ si el dado fuera equilibrado? 
+Deberia valer 1/2
+1) Tome una “muestra bootstrap” seleccionando con reemplazo n = 100 (sı, la misma cantidad que el tamaño de la muestra original) de los valores observados. El
+comando sample puede ser util. Estime la probabilidad buscada a partir de la
+muestra bootstrapeada. 1
+2) Repita el paso anterior B = 5000 veces, guardando las proporciones bootstrapeadas
+en un vector titas.boot, θb∗
+3) Realizar un histograma de las proporciones bootstrapeadas. Observar que este gr´afico es una aproximaci´on del gr´afico de la funci´on de densidad de θb, fθb. ¿Tiene forma
+aproximadamente acampanada?
+4) A partir de las proporciones bootstrapeadas calcular un estimador del standard
+error de θb.
+5) Armar dos intervalos de confianza para θ basados en las muestras bootstrap de
+nivel 1 − α = 0,95 seg´un los dos m´etodos descriptos m´as arriba. A partir de lo
+obtenido, ¿contradice esto el supuesto de que el dado es equilibrado?
+
+```{r}
+
+titas_ej4 = replicate(5000,{
+  sampled_ej4 = sample(data_ej4, 100, replace = TRUE)
+  sum(sampled_ej4 %% 2 == 0)
+})
+
+mean(titas_ej4)
+hist(titas_ej4)
+
+```
+4) A partir de las proporciones bootstrapeadas calcular un estimador del standard
+error de θb.
+5) Armar dos intervalos de confianza para θ basados en las muestras bootstrap de
+nivel 1 − α = 0,95 seg´un los dos m´etodos descriptos m´as arriba. A partir de lo
+obtenido, ¿contradice esto el supuesto de que el dado es equilibrado?
+
+```{r}
+NormQuantil = qnorm(0.975)*sd(titas_ej4)
+IC_ej4N = c(mean(titas_ej4)-NormQuantil,mean(titas_ej4)+ NormQuantil)
+
+IC_ej4Q = c(quantile(titas_ej4, probs = 0.025),quantile(titas_ej4, probs = 0.975))
+print(IC_ej4N)
+print(IC_ej4Q)
+print(sum(IC_ej4N[1]<=titas_ej4  & IC_ej4N[2] >=titas_ej4 )/length(titas_ej4))
+
+print(sum((IC_ej4Q[1] <= titas_ej4  & IC_ej4Q[2] >= titas_ej4 )/length(titas_ej4)))
+
+```
+5. (Para hacer con el R) Instalar el paquete Lock5withR correspondiente al libro de Lock 2. En
+dicho paquete hay un conjunto de n = 25 datos que se denomina MustangPrice. Cargarlo al R con la instruccion data("MustangPrice") .
+
+```{r}
+library("Lock5withR")
+# Load the "MustangPrice" dataset
+#data("MustangPrice")
+plot(MustangPrice$Miles, MustangPrice$Price)
+cor(MustangPrice$Miles , MustangPrice$Price )
+
+```
+
+
+```{r}
+cor_bootstrap = replicate(5000,{
+  sampled_Price = sample(MustangPrice$Price, 25, replace = TRUE)
+  sampled_Miles = sample(MustangPrice$Miles, 25, replace = TRUE)
+  cor(sampled_Price , sampled_Miles)
+})
+hist(cor_bootstrap)
+
+```
+Es una normal con media 0. 
+
+```{r}
+sd_cor = qnorm(0.975)*sd(cor_bootstrap)
+
+IC_cor = c(mean(cor_bootstrap)-sd_cor,mean(cor_bootstrap)+ sd_cor)
+
+
+print(sum(IC_cor[1]<=cor_bootstrap  & IC_cor[2] >=cor_bootstrap)/length(cor_bootstrap))
+
+
+```
+
+```{r}
+price_bootstrap = replicate(5000 , {
+  sampled_Price = sample(MustangPrice$Price, 25, replace = TRUE)
+  median(sampled_Price)
+})
+hist(price_bootstrap)
+```
+No tiene forma acampanada por lo que su distribucio  no se parece a la normal 
+
+```{r}
+price_bootstrap_mean = replicate(5000 , {
+  sampled_Price = sample(MustangPrice$Price, 25, replace = TRUE)
+  mean(sampled_Price)
+})
+hist(price_bootstrap_mean)
+```
+Si se puede. 
