@@ -1,0 +1,63 @@
+---
+title: "Goico"
+output: html_document
+date: "2023-11-06"
+---
+
+```{r cars}
+data = mtcars
+colums = c("mpg","wt","drat","disp","qsec","hp")
+df = data[colums]
+pairs(df)
+
+```
+Elegimos wt porque tiene poca dispersion (poca varianza), como disp tiene forma curva es mentir para un modelo lineal probemos tomando logaritmos 
+Ademas elegimos hp porque se ve mas lineal que las otras variables. 
+
+```{r pressure, echo=FALSE}
+df["disp_l"] = log(df["disp"])
+pairs(df)
+cor(df)
+
+Y = df$mpg
+Y_p = 
+  
+X = model.matrix(mpg~wt+qsec , data = data)
+
+B_p = solve(t(X)%*%X) %*% t(X) %*% Y
+B_p
+
+P =  X %*% solve(t(X)%*%X) %*% t(X)
+n = 32 #cantida de datos (filas del dataset )
+p = 3 # dimension donde vive Beta 
+I = diag(n)
+
+
+var_residual = (t(Y) %*% (I-P) %*% Y) / (n - p)
+var_residual
+
+sigma_beta_p_p = var_residual[1][1] * solve(t(X) %*% X)
+
+sigma_beta_p_p
+
+model = lm(mpg~wt+qsec,data=mtcars)
+summary(model)
+```
+aca los B_p son los titas que vimos en la teorica
+
+
+```{r}
+
+model2 = lm(mpg~wt+qsec+hp,data=mtcars)
+summary(model2)
+```
+qsec no es significativa pero solo en presencia de otras variables que aportan la misma informacion
+
+cor(df$qsec , df$hp)
+```{r}
+model3 = lm(mpg~wt+hp,data=mtcars)
+summary(model3)
+```
+
+
+
