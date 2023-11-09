@@ -1,0 +1,64 @@
+---
+title: "Untitled"
+author: "ss"
+date: "2023-11-09"
+output: html_document
+---
+
+```{r}
+df = read.csv('1-2-alpes.csv')
+plot(df$PA,df$PE)
+cor(df)
+df$PEC = (df$PE-32)*5/9
+df$PEC
+df$PAA = df$PA/29.921
+```
+
+
+```{r}
+model = lm(PEC~PAA, data = df)
+summary(model)
+
+library("ggplot2")
+ggplot(df, aes(x=PAA, y=PEC)) + 
+  geom_point() +
+  geom_smooth(method='lm', formula=y~x, col='red') +
+  theme_light()
+```
+```{r}
+hist(model$residuals)
+```
+```{r}
+plot(model)
+```
+
+```{r}
+df_limpio = df[-12,]
+model_limpio = lm(PEC~PAA, data = df_limpio)
+
+ggplot(df_limpio, aes(x=PAA, y=PEC)) + 
+  geom_point() +
+  geom_smooth(method='lm', formula=y~x, col='red') +
+  theme_light()
+```
+```{r}
+plot(model_limpio)
+```
+
+
+```{r}
+df$PAA = log(df$PAA)
+df$PEC = 1 / df$PEC
+
+```
+
+```{r}
+model_final = lm(PEC~PAA, data = df )
+
+plot(model_final)
+
+summary(model_final)
+```
+
+
+
