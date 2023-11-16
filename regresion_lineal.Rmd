@@ -1,0 +1,146 @@
+---
+title: "Regresion_lineal"
+author: "Jhosept Sanchez"
+date: "2023-11-12"
+output: html_document
+---
+
+```{r}
+lakes =  read.csv("C:/Users/Goico/Desktop/Github/Facu/IECD/datasets/glakes.csv")
+
+plot(lakes$Tonnage , lakes$Time)
+lakes$Time = log(lakes$Time)
+lakes$Tonnage = lakes$Tonnage**0.25
+```
+
+
+```{r}
+
+#plot(lakes$Time , lakes$Tonnage)
+m_lakes = lm(Time~Tonnage , data = lakes)
+summary(m_lakes)
+```
+
+```{r}
+plot(lakes$Tonnage , lakes$Time)
+abline(m_lakes, col = "red")
+```
+
+
+a) b0 = 1.18842 , b1 = 0.30910 , varianza de los errores vale 0.09 , 
+
+d) el p value de b1 es 3.6e-12 que es el alfa mas chico para el que se rechaza h0 es decir que para todos los mayores rechazo entonces , mi t value es 11.332
+si acepto un error del 1% rechazo que b1 sea 0.
+
+el estadistico es una normal(0,o^2*d_ii) como no conozco o^2 la estimo 
+y termino usando una student(n-p), bajo h0- 
+tita_i^ / sd(X)sqrt(dii)  
+dii varianza estimada de la variable i 
+quien es sd? 
+
+n = cant de observaciones y p  cantidad de parametros utilizados en este caso p = 2 
+
+
+e) ¿ .. . .. ? 
+
+f) 
+
+```{r}
+l_sigma = summary(m_lakes)$sigma
+XtX = t(model.matrix(m_lakes))%*%model.matrix(m_lakes)
+XtX.inv = solve(XtX)
+XtX.inv
+```
+
+
+```{r}
+Sigma = l_sigma * l_sigma * XtX.inv
+Sigma
+```
+```{r}
+sd = sqrt(diag(Sigma))
+print(l_sigma*sqrt(XtX.inv[2,2]))
+sd
+```
+```{r}
+predict(m_lakes)
+```
+```{r}
+cor(lakes$Time,predict(m_lakes))
+```
+como mi R^2 es 0.8157603 si calculo R es 0.9031945 es decir que mi R es mi correlacion entre los predichos y los que intento 
+predecir 
+
+```{r}
+x_0 = c(1 , 156.25)
+l_sigma * sqrt(  t(x_0) %*% XtX.inv %*% x_0  )
+
+```
+
+```{r}
+credit <- read.csv("C:/Users/Goico/Desktop/Github/Facu/IECD/datasets/credit.txt")
+
+m_credit = lm(Balance~. , data = credit)
+
+predict(m_credit)[2]
+```
+# Entiendo que con modelo se refiere a 
+Yi = sum i xi*bi con x1 = 1 es el intercept 
+
+el modelo ajustado es m_credit (consultar) 
+
+b) el valor predicho para la segunda observacion es : 913.1735  
+
+
+```{r}
+y = credit["Balance"]
+913.1735-y[2,] 
+
+#sum(abs(predict(m_credit) - y))
+
+residuos = residuals(m_credit)
+
+sum(abs(residuals(m_credit)))
+
+numeric_columns <- credit[sapply(credit, is.numeric)]
+
+#la correlacion muestra es la que calculo siempre 
+correlations <- sapply(numeric_columns, function(column) cor(column, residuos))# practicamente 0. 
+
+varianza_credit = summary(m_credit)$sigma ^2 
+
+# Existe alguna forma de plotear un modeo que use mas de una variable, puedo plotear para cada uno y tener como una foto 
+# de lo que quiero ver ( Ejemplo Abajo ) 
+plot( credit$Limit , credit$Balance )
+abline(m_credit)
+
+```
+
+```{r}
+summary(m_credit)
+
+```
+Las variables mas significativas son las que tienen un menor p valor , ya que son las que mas dificilmente voy a aceptar que pueden ser 0. 
+por ejemplo el intercept, Income, student, Limit.
+
+e) el p-vlaor para age es 0.01664 si H0: Bage = 0 vs H1: Bage != 0  
+como quiero para H1: Bage < 0 mi p valor va a ser el doble del anterior es decir 0.0166 
+(Consultar bien como justifico esto tiene sentido que sea mas bajo, antes rechazaba H0 si Bage me daba muy disinto de  0 
+ahora solo rechazo si es muy menor a 0 por lo que como el p-valor es el menor alfa al que rechazo H0 con el valor observado.
+basicamente )
+
+```{r}
+length( m_credit$coefficients )
+
+
+sigma_credit = sqrt(varianza_credit)
+
+XtX = t(model.matrix(m_credit))%*%model.matrix(m_credit)
+XtX.inv = solve(XtX)
+sigma_credit*sqrt(XtX.inv["Education","Education"])
+
+
+```
+
+
+
