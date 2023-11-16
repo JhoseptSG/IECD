@@ -6,8 +6,8 @@ output: html_document
 ---
 
 ```{r}
-lakes =  read.csv("C:/Users/Goico/Desktop/Github/Facu/IECD/datasets/glakes.csv")
-
+#lakes =  read.csv("C:/Users/Goico/Desktop/Github/Facu/IECD/datasets/glakes.csv")
+lakes =  read.csv("glakes.csv")
 plot(lakes$Tonnage , lakes$Time)
 lakes$Time = log(lakes$Time)
 lakes$Tonnage = lakes$Tonnage**0.25
@@ -78,8 +78,8 @@ l_sigma * sqrt(  t(x_0) %*% XtX.inv %*% x_0  )
 ```
 
 ```{r}
-credit <- read.csv("C:/Users/Goico/Desktop/Github/Facu/IECD/datasets/credit.txt")
-
+#credit <- read.csv("C:/Users/Goico/Desktop/Github/Facu/IECD/datasets/credit.txt")
+credit = read.csv("credit.txt")
 m_credit = lm(Balance~. , data = credit)
 
 predict(m_credit)[2]
@@ -131,16 +131,45 @@ basicamente )
 
 ```{r}
 length( m_credit$coefficients )
-
-
 sigma_credit = sqrt(varianza_credit)
-
 XtX = t(model.matrix(m_credit))%*%model.matrix(m_credit)
 XtX.inv = solve(XtX)
 sigma_credit*sqrt(XtX.inv["Education","Education"])
 
+```
+Ejercicio 7
 
+```{r}
+set.seed(1)
+train_ind = sample(1:nrow(credit),2/3*nrow(credit))
+credit_train = credit[ train_ind,]
+credit_test =  credit[-train_ind,]
+nrow(credit_test)
+nrow(credit_train)
 ```
 
+```{r}
+columns_credit = c("Income","Age","Cards")
 
+error = 2.8e+08
+ 
+ for (i in 1:3){
+    combi <- combn(columns_credit, i, simplify = TRUE)
+   for (j in 1:ncol(combi)){
+    formula <- as.formula(paste("Balance ~", paste(combi[,j], collapse = "+")))
+    model <- lm(formula, data = credit_train)
+    error_modelo = sum((credit_test$Balance- predict(model,credit_test))**2)
+    print(error_modelo)
+    if (error > error_modelo) {
+      error = error_modelo 
+      mejor_formula = formula
+      mejor_modelo = model
+    } 
+        
+  }
+}
+
+
+
+```
 
